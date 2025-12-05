@@ -1,6 +1,6 @@
 import unittest
 
-from block_markdown import markdown_to_blocks
+from block_markdown import BlockType, markdown_to_blocks, block_to_block_type
 
 
 class TestBlockMarkdown(unittest.TestCase):
@@ -28,3 +28,26 @@ This is the same paragraph on a new line
                 "- This is a list\n- with items",
             ],
         )
+
+    def test_block_heading(self):
+        block_type = block_to_block_type("# Dumb Heading")
+        self.assertEqual(block_type, BlockType.HEADING)
+
+    def test_block_code(self):
+        block_type = block_to_block_type("``` Some dumb code.```")
+        self.assertEqual(block_type, BlockType.CODE)
+
+    def test_block_quote(self):
+        block_type = block_to_block_type("> Dumb Quote")
+        self.assertEqual(block_type, BlockType.QUOTE)
+
+    def test_block_u_list(self):
+        block_type = block_to_block_type("- Dumb List")
+        self.assertEqual(block_type, BlockType.UNORDERED_LIST)
+
+    def test_block_o_list(self):
+        block_type = block_to_block_type(
+            """1. First Dumb.
+2. Second Dumb"""
+        )
+        self.assertEqual(block_type, BlockType.ORDERED_LIST)
