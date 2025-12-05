@@ -5,6 +5,8 @@ from inline_markdown import (
     split_nodes_delimiter,
     extract_markdown_images,
     extract_markdown_links,
+    split_nodes_link,
+    split_nodes_image,
 )
 
 
@@ -52,4 +54,62 @@ class TestInlineMarkdown(unittest.TestCase):
                 ("to youtube", "https://www.youtube.com/@bootdotdev"),
             ],
             matches,
+        )
+
+    def test_split_links(self):
+        node = TextNode(
+            "This is text with a link [to boot dev](https://www.boot.dev) and [to youtube](https://www.youtube.com/@bootdotdev)",
+            TextType.PLAIN_TEXT,
+        )
+        new_nodes = split_nodes_link([node])
+        self.assertListEqual(
+            [
+                TextNode("This is text with a link ", TextType.PLAIN_TEXT),
+                TextNode("to boot dev", TextType.LINK_TEXT, "https://www.boot.dev"),
+                TextNode(" and ", TextType.PLAIN_TEXT),
+                TextNode(
+                    "to youtube",
+                    TextType.LINK_TEXT,
+                    "https://www.youtube.com/@bootdotdev",
+                ),
+            ],
+            new_nodes,
+        )
+
+    def test_split_no_link(self):
+        node = TextNode(
+            "This is text with no link",
+            TextType.PLAIN_TEXT,
+        )
+        new_nodes = split_nodes_link([node])
+        self.assertListEqual(
+            [
+                TextNode(
+                    "This is text with no link",
+                    TextType.PLAIN_TEXT,
+                )
+            ],
+            new_nodes,
+        )
+
+    def test_split_images(self):
+        node = TextNode(
+            "This is text with an ![image](https://i.imgur.com/zjjcJKZ.png) and another ![second image](https://i.imgur.com/3elNhQu.png)",
+            TextType.PLAIN_TEXT,
+        )
+        new_nodes = split_nodes_image([node])
+        self.assertListEqual(
+            [
+                TextNode("This is text with an ", TextType.PLAIN_TEXT),
+                TextNode(
+                    "image", TextType.IMAGE_TEXT, "https://i.imgur.com/zjjcJKZ.png"
+                ),
+                TextNode(" and another ", TextType.PLAIN_TEXT),
+                TextNode(
+                    "second image",
+                    TextType.IMAGE_TEXT,
+                    "https://i.imgur.com/3elNhQu.png",
+                ),
+            ],
+            new_nodes,
         )
