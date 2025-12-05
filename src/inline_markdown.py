@@ -3,6 +3,29 @@ import re
 from textnode import TextNode, TextType
 
 
+delimiters = [
+    (TextType.BOLD_TEXT, "**"),
+    (TextType.ITALIC_TEXT, "_"),
+    (TextType.CODE_TEXT, "`"),
+    (TextType.IMAGE_TEXT, ""),
+    (TextType.LINK_TEXT, ""),
+]
+
+
+def text_to_textnodes(text):
+    new_nodes = [TextNode(text, TextType.PLAIN_TEXT)]
+
+    for d in delimiters:
+        if d[0] is TextType.LINK_TEXT:
+            new_nodes = split_nodes_link(new_nodes)
+        elif d[0] is TextType.IMAGE_TEXT:
+            new_nodes = split_nodes_image(new_nodes)
+        else:
+            new_nodes = split_nodes_delimiter(new_nodes, d[1], d[0])
+
+    return new_nodes
+
+
 def split_node(old_node: TextNode, delimiter, text_type):
     if old_node.text_type != TextType.PLAIN_TEXT:
         return [old_node]
@@ -32,6 +55,10 @@ def split_nodes_delimiter(old_nodes, delimiter, text_type):
 def split_nodes_link(old_nodes):
     new_nodes = []
     for node in old_nodes:
+        if node.text_type is not TextType.PLAIN_TEXT:
+            new_nodes.append(node)
+            continue
+
         text = node.text
 
         matches = extract_markdown_links(text)
@@ -52,6 +79,10 @@ def split_nodes_link(old_nodes):
 def split_nodes_image(old_nodes):
     new_nodes = []
     for node in old_nodes:
+        if node.text_type is not TextType.PLAIN_TEXT:
+            new_nodes.append(node)
+            continue
+
         text = node.text
 
         matches = extract_markdown_images(text)
