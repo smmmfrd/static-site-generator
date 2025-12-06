@@ -31,7 +31,7 @@ class TextNode:
 def text_node_to_html_node(text_node: TextNode):
     tag = None
     value = text_node.text
-    props = {}
+    props = None
 
     if text_node.text_type is TextType.PLAIN_TEXT:
         tag = None
