@@ -14,6 +14,15 @@ class BlockType(Enum):
     ORDERED_LIST = "ordered_list"
 
 
+def extract_title(markdown):
+    blocks = markdown_to_blocks(markdown)
+    for block in blocks:
+        if block.startswith("# "):
+            return block[1:].strip()
+
+    raise Exception("No header detected")
+
+
 def markdown_to_html_node(markdown):
     blocks = markdown_to_blocks(markdown)
     parent = ParentNode(tag="div", children=[])
@@ -22,7 +31,6 @@ def markdown_to_html_node(markdown):
         html_node = block_to_html_node(block)
         parent.children.append(html_node)
 
-    print(parent.to_html())
     return parent
 
 
