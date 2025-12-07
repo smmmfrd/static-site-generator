@@ -148,7 +148,7 @@ def list_to_html_node(block, ordered):
     lines = block.split("\n")
     html_lines = []
     for item in lines:
-        text = item[3 if ordered else 2]
+        text = item[3 if ordered else 2 :]
         children = text_to_children(text)
         html_lines.append(ParentNode("li", children))
 
