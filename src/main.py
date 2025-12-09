@@ -1,15 +1,21 @@
 import os
 import shutil
+import sys
 
 from block_markdown import markdown_to_html_node, extract_title
 
 dir_path_static = "./static"
-dir_path_public = "./public"
+dir_path_public = "./docs"
 dir_path_content = "./content"
 dir_path_templates = "./"
 
 
 def main():
+    basepath = "/"
+
+    if len(sys.argv) > 1:
+        basepath = sys.argv[1]
+
     print("Deleting public directory...")
     if os.path.exists(dir_path_public):
         shutil.rmtree(dir_path_public)
@@ -20,7 +26,7 @@ def main():
     print("Generating page from content/...")
     template_path = os.path.join(dir_path_templates, "template.html")
 
-    generate_pages_recursive(dir_path_content, template_path, dir_path_public)
+    generate_pages_recursive(dir_path_content, template_path, dir_path_public, basepath)
 
 
 def copy_files_recursive(source_path, target_path):
@@ -37,7 +43,7 @@ def copy_files_recursive(source_path, target_path):
             copy_files_recursive(from_path, dest_path)
 
 
-def generate_pages_recursive(content_path, template_path, dest_path):
+def generate_pages_recursive(content_path, template_path, dest_path, basepath):
     if not os.path.exists(content_path):
         return
 
@@ -48,12 +54,12 @@ def generate_pages_recursive(content_path, template_path, dest_path):
 
         if os.path.isfile(from_path):
             target_path = target_path.removesuffix(".md") + ".html"
-            generate_page(from_path, template_path, target_path)
+            generate_page(from_path, template_path, target_path, basepath)
         else:
-            generate_pages_recursive(from_path, template_path, target_path)
+            generate_pages_recursive(from_path, template_path, target_path, basepath)
 
 
-def generate_page(from_path, template_path, dest_path):
+def generate_page(from_path, template_path, dest_path, basepath):
     print(f"Generating page from {from_path} to {dest_path} using {template_path}")
     with open(from_path) as md_file:
         md = md_file.read()
@@ -65,6 +71,9 @@ def generate_page(from_path, template_path, dest_path):
 
             template = template.replace("{{ Title }}", title)
             template = template.replace("{{ Content }}", html)
+
+            template = template.replace(f"href=/", "href={basepath}")
+            template = template.replace(f"src=/", "src={basepath}")
 
             dest_dir_path = os.path.dirname(dest_path)
             if dest_dir_path != "":
