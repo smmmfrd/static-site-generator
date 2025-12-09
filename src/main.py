@@ -18,10 +18,9 @@ def main():
     copy_files_recursive(dir_path_static, dir_path_public)
 
     print("Generating page from content/...")
-    content_path = os.path.join(dir_path_content, "index.md")
     template_path = os.path.join(dir_path_templates, "template.html")
-    html_path = os.path.join(dir_path_public, "index.html")
-    generate_page(content_path, template_path, html_path)
+
+    generate_pages_recursive(dir_path_content, template_path, dir_path_public)
 
 
 def copy_files_recursive(source_path, target_path):
@@ -36,6 +35,22 @@ def copy_files_recursive(source_path, target_path):
             shutil.copy(from_path, dest_path)
         else:
             copy_files_recursive(from_path, dest_path)
+
+
+def generate_pages_recursive(content_path, template_path, dest_path):
+    if not os.path.exists(content_path):
+        return
+
+    for filename in os.listdir(content_path):
+        from_path = os.path.join(content_path, filename)
+        target_path = os.path.join(dest_path, filename)
+        print(f" * {from_path} -> {target_path}")
+
+        if os.path.isfile(from_path):
+            target_path = target_path.removesuffix(".md") + ".html"
+            generate_page(from_path, template_path, target_path)
+        else:
+            generate_pages_recursive(from_path, template_path, target_path)
 
 
 def generate_page(from_path, template_path, dest_path):
